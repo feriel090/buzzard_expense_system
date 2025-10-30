@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+body {
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #0d47a1 0%, #f8bbd0 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.edit-card {
+    background: #fff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    width: 450px;
+}
+
+h2 {
+    text-align: center;
+    color: navy;
+    margin-bottom: 25px;
+}
+
+label {
+    font-weight: 600;
+    color: navy;
+    display: block;
+    margin-bottom: 5px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    transition: 0.3s;
+}
+
+input:focus, textarea:focus {
+    border-color: #d81b60;
+    box-shadow: 0 0 5px rgba(216,27,96,0.3);
+    outline: none;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: navy;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: #ffb6c1;
+    color: navy;
+}
+</style>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div class="edit-card">
+    <h2>✏️ Edit Expense — Buzzard</h2>
+
+    <form id="editExpenseForm" method="post" action="{{ url_for('update_expense', expense_id=e['id']) }}">
+        <div>
+            <label>Title</label>
+            <input type="text" name="title" value="{{ e['title'] }}" required>
+        </div>
+        <div>
+            <label>Category</label>
+            <input type="text" name="category" value="{{ e['category'] }}" required>
+        </div>
+        <div>
+            <label>Amount (₱)</label>
+            <input type="number" name="amount" step="0.01" value="{{ e['amount'] }}" required>
+        </div>
+        <div>
+            <label>Date</label>
+            <input type="date" name="date" value="{{ e['date'] }}" required>
+        </div>
+        <div>
+            <label>Purpose / Remarks</label>
+            <textarea name="purpose" rows="3">{{ e['purpose'] }}</textarea>
+        </div>
+
+        <button type="submit">💾 Save Changes</button>
+    </form>
+</div>
+
+<script>
+document.getElementById("editExpenseForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.redirected) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Expense Updated!',
+                text: 'The expense has been successfully updated.',
+                showConfirmButton: false,
+                timer: 1800,
+                background: '#fff',
+                color: '#0d47a1',
+                iconColor: '#d81b60'
+            });
+            setTimeout(() => {
+                window.location.href = response.url;
+            }, 1800);
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Update Failed',
+                text: 'Something went wrong. Please try again.',
+                confirmButtonColor: '#d81b60'
+            });
+        }
+    })
+    .catch(() => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Connection Error',
+            text: 'Unable to update expense. Check your internet or server.',
+            confirmButtonColor: '#d81b60'
+        });
+    });
+});
+</script>
+
+{% endblock %}
